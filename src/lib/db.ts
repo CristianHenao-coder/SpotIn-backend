@@ -14,7 +14,7 @@ export async function connectDB() {
 
   if (!cache.promise) {
     cache.promise = mongoose
-      .connect(MONGODB_URI, { dbName: "app-spotin" })
+      .connect(MONGODB_URI, { dbName: "app-spotIn" })
       .then((m) => m);
   }
 
