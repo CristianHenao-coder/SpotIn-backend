@@ -6,6 +6,9 @@ import { requireAuth, requireRole } from "@/src/lib/auth";
 import { hashPassword } from "@/src/lib/password";
 import { User } from "@/src/models/User";
 
+
+export const runtime = "nodejs";
+
 const Body = z.object({
   name: z.string().min(2),
   email: z.string().email(),
@@ -35,6 +38,9 @@ export async function POST(req: Request) {
       isActive: true,
     });
 
+    console.log("AUTH HEADER:", req.headers.get("authorization"));
+console.log("AUTH HEADER 2:", req.headers.get("Authorization"));
+
     return NextResponse.json(
       { user: { id: String(user._id), name: user.name, email: user.email, role: user.role } },
       { status: 201 }
@@ -46,5 +52,8 @@ export async function POST(req: Request) {
     if (e?.message === "UNAUTHORIZED") return NextResponse.json({ message: "No auth" }, { status: 401 });
     if (e?.message === "FORBIDDEN") return NextResponse.json({ message: "No permitido" }, { status: 403 });
     return NextResponse.json({ message: "Error" }, { status: 500 });
+
+
+    
   }
 }

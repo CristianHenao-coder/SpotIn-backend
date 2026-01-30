@@ -16,11 +16,22 @@ export function signToken(
 }
 
 export function requireAuth(req: Request): JwtPayload {
-  const auth = req.headers.get("authorization") || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  const raw =
+    req.headers.get("authorization") ??
+    req.headers.get("Authorization") ??
+    "";
+
+  const token = raw.replace(/^Bearer\s+/i, "").trim(); // soporta Bearer / bearer + espacios
+
   if (!token) throw new Error("UNAUTHORIZED");
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+  try {
+    return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  } catch {
+    throw new Error("UNAUTHORIZED");
+  }
 }
+
 
 export function requireRole(expected: "ADMIN" | "USER", actual: "ADMIN" | "USER") {
   if (expected !== actual) throw new Error("FORBIDDEN");
