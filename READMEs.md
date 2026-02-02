@@ -1,3 +1,5 @@
+readme 
+
 School Attendance Admin System
 
 A web-based school attendance management system powered by dynamic QR codes, designed for educational administrators to manage students, classrooms, schedules, and attendance efficiently.

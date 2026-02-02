@@ -25,7 +25,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
         return NextResponse.json(updated);
     } catch (error: any) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+        return NextResponse.json({
+            message: "Error updating schedule",
+            error: error.message,
+            receivedBody: body
+        }, { status: 500 });
     }
 }
 

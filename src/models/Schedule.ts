@@ -2,10 +2,11 @@ import { Schema, model, models } from "mongoose";
 
 const ScheduleSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    classroomId: { type: Schema.Types.ObjectId, ref: "Classroom", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User" }, // Optional fallback if needed, but primary is classroom
     siteId: { type: Schema.Types.ObjectId, ref: "Site", required: true },
 
-    dayOfWeek: { type: Number, min: 0, max: 6, required: true }, // 0=Dom
+    daysOfWeek: [{ type: Number, min: 0, max: 6 }], // Array of days [1, 3, 5]
     startTime: { type: String, required: true }, // "08:00"
     endTime: { type: String, required: true },   // "10:00"
 
@@ -15,6 +16,11 @@ const ScheduleSchema = new Schema(
   { timestamps: true, collection: "schedules" }
 );
 
-ScheduleSchema.index({ userId: 1, dayOfWeek: 1, isActive: 1 });
+ScheduleSchema.index({ classroomId: 1, isActive: 1 });
 
-export const Schedule = models.Schedule || model("Schedule", ScheduleSchema);
+// Force recompilation of model to update schema during hot-reload
+if (models.Schedule) {
+  delete models.Schedule;
+}
+
+export const Schedule = model("Schedule", ScheduleSchema);
