@@ -1,59 +1,89 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-
 import { connectDB } from "@/src/lib/db";
 import { requireAuth, requireRole } from "@/src/lib/auth";
 import { hashPassword } from "@/src/lib/password";
 import { User } from "@/src/models/User";
+import { AuditLog } from "@/src/models/AuditLog";
 
+export async function GET(req: Request) {
+  try {
+    const user = requireAuth(req);
+    requireRole("ADMIN", user.role);
+    await connectDB();
 
-export const runtime = "nodejs";
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search");
+    const classroomId = searchParams.get("classroomId");
+    const isActive = searchParams.get("isActive");
 
-const Body = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
-  role: z.enum(["ADMIN", "USER"]).optional(),
-});
+    const query: any = { role: "USER" }; // Only fetch Students
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } }
+      ];
+    }
+    if (classroomId) query.classroomId = classroomId;
+    if (isActive !== null) query.isActive = isActive === "true";
+
+    const students = await User.find(query)
+      .populate("classroomId", "name")
+      .select("-passwordHash") // Exclude password
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json(students);
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
   try {
-    const auth = requireAuth(req);
-    requireRole("ADMIN", auth.role);
-
-    const body = Body.parse(await req.json());
-
+    const adminUser = requireAuth(req);
+    requireRole("ADMIN", adminUser.role);
     await connectDB();
 
-    const exists = await User.findOne({ email: body.email }).lean();
-    if (exists) return NextResponse.json({ message: "Email ya existe" }, { status: 409 });
+    const { name, email, password, classroomId, isActive } = await req.json();
 
-    const passwordHash = await hashPassword(body.password);
+    if (!name || !email || !password) {
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+    }
 
-    const user = await User.create({
-      name: body.name,
-      email: body.email,
-      passwordHash,
-      role: body.role ?? "USER",
-      isActive: true,
+    // Check if email exists
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return NextResponse.json({ message: "Email already exists" }, { status: 400 });
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const newUser = await User.create({
+      name,
+      email,
+      passwordHash: hashedPassword,
+      role: "USER",
+      classroomId: classroomId || undefined,
+      isActive: isActive ?? true
     });
 
-    console.log("AUTH HEADER:", req.headers.get("authorization"));
-console.log("AUTH HEADER 2:", req.headers.get("Authorization"));
+    await AuditLog.create({
+      action: "CREATE_STUDENT",
+      actorId: adminUser.sub,
+      targetType: "User",
+      targetId: newUser._id,
+      meta: { name, email }
+    });
 
-    return NextResponse.json(
-      { user: { id: String(user._id), name: user.name, email: user.email, role: user.role } },
-      { status: 201 }
-    );
-  } catch (e: any) {
-    if (e?.name === "ZodError") {
-      return NextResponse.json({ message: "Datos inválidos", issues: e.issues }, { status: 400 });
-    }
-    if (e?.message === "UNAUTHORIZED") return NextResponse.json({ message: "No auth" }, { status: 401 });
-    if (e?.message === "FORBIDDEN") return NextResponse.json({ message: "No permitido" }, { status: 403 });
-    return NextResponse.json({ message: "Error" }, { status: 500 });
-
-
-    
+    return NextResponse.json({
+      _id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      classroomId: newUser.classroomId,
+      isActive: newUser.isActive
+    }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

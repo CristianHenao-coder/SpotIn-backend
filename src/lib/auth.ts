@@ -21,7 +21,16 @@ export function requireAuth(req: Request): JwtPayload {
     req.headers.get("Authorization") ??
     "";
 
-  const token = raw.replace(/^Bearer\s+/i, "").trim(); // soporta Bearer / bearer + espacios
+  let token = raw.replace(/^Bearer\s+/i, "").trim();
+
+  // Support for Admin Web Cookie (Manual parse to avoid async next/headers)
+  if (!token) {
+    const cookieHeader = req.headers.get("cookie") || "";
+    const match = cookieHeader.match(/(?:^|;\s*)admin_token=([^;]*)/);
+    if (match) {
+      token = match[1];
+    }
+  }
 
   if (!token) throw new Error("UNAUTHORIZED");
 
