@@ -1,0 +1,11 @@
+{
+    "actorId": "65f100000000000000000002",
+    "action": "CONFIRM_ATTENDANCE",
+    "targetType": "Attendance",
+    "meta": {
+        "classroom": "10A - Matemáticas",
+        "date": "2026-02-02"
+    },
+    "ip": "190.25.123.10",
+    "userAgent": "Chrome/121.0.0"
+}

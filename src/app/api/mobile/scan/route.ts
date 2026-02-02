@@ -7,6 +7,7 @@ import { Attendance } from "@/src/models/Attendance";
 import { Schedule } from "@/src/models/Schedule";
 import { AuditLog } from "@/src/models/AuditLog";
 import { AppSetting } from "@/src/models/AppSetting";
+import { User } from "@/src/models/User";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
@@ -102,15 +103,21 @@ export async function POST(req: Request) {
         const dayOfWeek = today.getDay(); // 0-6
         const nowMinutes = today.getHours() * 60 + today.getMinutes();
 
+        // Find Student's Classroom
+        const student = await User.findById(user.sub).select("classroomId");
+        if (!student || !student.classroomId) {
+            return NextResponse.json({ ok: false, message: "Student not assigned to a classroom." }, { status: 403 });
+        }
+
         const schedule = await Schedule.findOne({
-            userId: user.sub,
+            classroomId: student.classroomId,
             siteId: site._id,
-            dayOfWeek: dayOfWeek,
+            daysOfWeek: dayOfWeek, // Mongoose checks if array contains this value
             isActive: true
         });
 
         if (!schedule) {
-            return NextResponse.json({ ok: false, message: "No schedule found for this site today." }, { status: 403 });
+            return NextResponse.json({ ok: false, message: "No schedule found for your class today." }, { status: 403 });
         }
 
         const startMinutes = getMinutesFromMidnight(schedule.startTime);

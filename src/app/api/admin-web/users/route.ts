@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       email,
       passwordHash: hashedPassword,
       role: "USER",
-      classroomId: classroomId || undefined,
+      classroomId: classroomId || null, // Ensure empty string becomes null or if valid it saves
       isActive: isActive ?? true
     });
 

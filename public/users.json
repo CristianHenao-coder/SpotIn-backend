@@ -1,0 +1,82 @@
+[
+    {
+        "name": "Ana Torres",
+        "email": "ana.torres@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Luis Gómez",
+        "email": "luis.gomez@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Sofía Martínez",
+        "email": "sofia.martinez@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Daniel Ruiz",
+        "email": "daniel.ruiz@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "María López",
+        "email": "maria.lopez@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Carlos Hernández",
+        "email": "carlos.hernandez@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Valentina Ríos",
+        "email": "valentina.rios@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Miguel Ángel Pérez",
+        "email": "miguel.perez@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Camila Vargas",
+        "email": "camila.vargas@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    },
+    {
+        "name": "Andrés Molina",
+        "email": "andres.molina@school.edu",
+        "passwordHash": "$2b$10$seedhash",
+        "role": "USER",
+        "classroomId": "65f200000000000000000001",
+        "isActive": true
+    }
+]

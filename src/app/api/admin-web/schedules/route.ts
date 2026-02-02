@@ -3,7 +3,7 @@ import { connectDB } from "@/src/lib/db";
 import { requireAuth, requireRole } from "@/src/lib/auth";
 import { Schedule } from "@/src/models/Schedule";
 import { AuditLog } from "@/src/models/AuditLog";
-import { User } from "@/src/models/User";
+import { Classroom } from "@/src/models/Classroom";
 
 export async function GET(req: Request) {
   try {
@@ -15,17 +15,20 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const siteId = searchParams.get("siteId");
     const dayOfWeek = searchParams.get("dayOfWeek");
+    const classroomId = searchParams.get("classroomId");
     const isActive = searchParams.get("isActive");
 
     const query: any = {};
     if (siteId) query.siteId = siteId;
-    if (dayOfWeek) query.dayOfWeek = Number(dayOfWeek);
+    // Filter if the day is present in the daysOfWeek array
+    if (dayOfWeek) query.daysOfWeek = Number(dayOfWeek);
+    if (classroomId) query.classroomId = classroomId;
     if (isActive !== null) query.isActive = isActive === "true";
 
     const schedules = await Schedule.find(query)
       .populate("siteId", "name")
-      .populate("userId", "name email")
-      .sort({ dayOfWeek: 1, startTime: 1 })
+      .populate("classroomId", "name")
+      .sort({ startTime: 1 })
       .lean();
 
     return NextResponse.json(schedules);
@@ -41,16 +44,17 @@ export async function POST(req: Request) {
     await connectDB();
 
     const body = await req.json();
-    const { userId, siteId, dayOfWeek, startTime, endTime, lateAfterMinutes } = body;
+    const { classroomId, siteId, daysOfWeek, startTime, endTime, lateAfterMinutes } = body;
 
-    if (!userId || !siteId || dayOfWeek === undefined || !startTime || !endTime) {
-      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+    // Validate Required
+    if (!classroomId || !siteId || !startTime || !endTime || !Array.isArray(daysOfWeek) || daysOfWeek.length === 0) {
+      return NextResponse.json({ message: "Missing required fields (classroom, site, days, times)" }, { status: 400 });
     }
 
     const newSchedule = await Schedule.create({
-      userId,
+      classroomId,
       siteId,
-      dayOfWeek,
+      daysOfWeek: daysOfWeek, // Array of numbers
       startTime,
       endTime,
       lateAfterMinutes: lateAfterMinutes || 10,
@@ -61,7 +65,8 @@ export async function POST(req: Request) {
       action: "CREATE_SCHEDULE",
       actorId: adminUser.sub,
       targetType: "Schedule",
-      targetId: newSchedule._id
+      targetId: newSchedule._id,
+      meta: { classroomId, siteId, daysOfWeek }
     });
 
     return NextResponse.json(newSchedule, { status: 201 });

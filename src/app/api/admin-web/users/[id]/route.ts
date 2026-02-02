@@ -13,6 +13,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         const { id } = await params;
         const body = await req.json();
 
+        // Handle classroomId: "" -> null to unset it, or keep it if valid
+        if (body.classroomId === "") {
+            body.classroomId = null;
+        }
+
         // If updating password
         if (body.password) {
             body.passwordHash = await hashPassword(body.password);
