@@ -7,10 +7,10 @@ const UserSchema = new Schema(
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ["ADMIN", "USER"], default: "USER", required: true },
     isActive: { type: Boolean, default: true },
+    classroomId: { type: Schema.Types.ObjectId, ref: "Classroom" },
   },
   { timestamps: true, collection: "users" }
 );
 
-UserSchema.index({ email: 1 }, { unique: true });
 
 export const User = models.User || model("User", UserSchema);
