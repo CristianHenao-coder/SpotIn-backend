@@ -5,12 +5,13 @@ import { Schedule } from "@/src/models/Schedule";
 import { AuditLog } from "@/src/models/AuditLog";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    let body;
     try {
         const adminUser = requireAuth(req);
         requireRole("ADMIN", adminUser.role);
         await connectDB();
         const { id } = await params;
-        const body = await req.json();
+        body = await req.json();
 
         const updated = await Schedule.findByIdAndUpdate(id, body, { new: true });
         if (!updated) return NextResponse.json({ message: "Not found" }, { status: 404 });

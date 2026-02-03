@@ -15,7 +15,7 @@ import { verify } from "jsonwebtoken";
 // Better: I'll use a server-only utility if possible, but middleware is edge.
 // For now, I will verify existence of the cookie. Verification needs `jose`.
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     // Protect /admin-web routes
