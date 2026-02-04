@@ -53,7 +53,12 @@ export default function QrSessionsPage() {
         try {
             const res = await fetch("/api/admin-web/qr-sessions");
             const data = await res.json();
-            setSessions(data);
+            if (Array.isArray(data)) {
+                setSessions(data);
+            } else {
+                setSessions([]);
+                console.error("QR Sessions API returned non-array:", data);
+            }
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
     };
@@ -167,7 +172,7 @@ export default function QrSessionsPage() {
                         <h3 className="text-white font-bold mb-4">Recent Sessions</h3>
                         {loading ? <div className="text-[#b491ca] text-center p-4">Loading...</div> : (
                             <div className="overflow-y-auto max-h-[400px] pr-2 space-y-3">
-                                {sessions.map(s => {
+                                {Array.isArray(sessions) && sessions.map(s => {
                                     const isExpired = new Date(s.expiresAt) < new Date();
                                     return (
                                         <div key={s._id} className="bg-[#1c1122] rounded-xl p-4 flex items-center justify-between border border-[#3a2348]">

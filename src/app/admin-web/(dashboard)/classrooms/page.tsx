@@ -52,8 +52,8 @@ export default function ClassroomsPage() {
             fetch("/api/admin-web/sites").then(res => res.json()),
             fetch("/api/admin-web/schedules").then(res => res.json())
         ]).then(([sitesData, schedulesData]) => {
-            setSites(sitesData);
-            setSchedules(schedulesData);
+            if (Array.isArray(sitesData)) setSites(sitesData);
+            if (Array.isArray(schedulesData)) setSchedules(schedulesData);
         }).catch(err => console.error(err));
     }, []);
 
@@ -73,7 +73,11 @@ export default function ClassroomsPage() {
             const res = await fetch(`/api/admin-web/classrooms?${params.toString()}`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data = await res.json();
-            setClassrooms(data);
+            if (Array.isArray(data)) {
+                setClassrooms(data);
+            } else {
+                setClassrooms([]);
+            }
         } catch (err) {
             setError("Error loading classrooms");
         } finally {
@@ -168,7 +172,7 @@ export default function ClassroomsPage() {
                     onChange={(e) => setFilterSite(e.target.value)}
                 >
                     <option value="">All Sites</option>
-                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                    {Array.isArray(sites) && sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                 </select>
                 <button
                     onClick={() => setFilterActive(!filterActive)}
@@ -199,7 +203,7 @@ export default function ClassroomsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#3a2348]">
-                                {classrooms.map(c => (
+                                {Array.isArray(classrooms) && classrooms.map(c => (
                                     <tr key={c._id} className="hover:bg-[#3a2348]/20 transition-colors">
                                         <td className="p-4 text-white font-medium">{c.name}</td>
                                         <td className="p-4 text-[#b491ca]">{c.siteId?.name || "N/A"}</td>
@@ -257,7 +261,7 @@ export default function ClassroomsPage() {
                                     onChange={(e) => setFormData({ ...formData, siteId: e.target.value })}
                                 >
                                     <option value="">Select Site</option>
-                                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                                    {Array.isArray(sites) && sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -268,7 +272,7 @@ export default function ClassroomsPage() {
                                     value={formData.scheduleIds}
                                     onChange={(e) => setFormData({ ...formData, scheduleIds: Array.from(e.target.selectedOptions, o => o.value) })}
                                 >
-                                    {schedules.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                                    {Array.isArray(schedules) && schedules.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                                 </select>
                                 <p className="text-xs text-[#b491ca] mt-1">Hold Ctrl/Cmd to select multiple</p>
                             </div>

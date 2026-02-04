@@ -31,7 +31,10 @@ export default function AttendancePage() {
         // Load Classrooms
         fetch("/api/admin-web/classrooms?isActive=true")
             .then(res => res.json())
-            .then(data => setClassrooms(data))
+            .then(data => {
+                if (Array.isArray(data)) setClassrooms(data);
+                else console.error("Classrooms API returned non-array:", data);
+            })
             .catch(console.error);
     }, []);
 
@@ -50,7 +53,11 @@ export default function AttendancePage() {
             const res = await fetch(`/api/admin-web/attendance?${params.toString()}`);
             if (!res.ok) throw new Error("Failed");
             const data = await res.json();
-            setAttendance(data);
+            if (Array.isArray(data)) {
+                setAttendance(data);
+            } else {
+                setAttendance([]);
+            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -59,7 +66,10 @@ export default function AttendancePage() {
     };
 
     const formatTime = (isoString: string) => {
-        return new Date(isoString).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' });
+        if (!isoString) return "-";
+        const dateObj = new Date(isoString);
+        if (isNaN(dateObj.getTime())) return "Invalid Date";
+        return dateObj.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -94,7 +104,7 @@ export default function AttendancePage() {
                         onChange={(e) => setClassroomId(e.target.value)}
                     >
                         <option value="">All Classrooms</option>
-                        {classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                        {Array.isArray(classrooms) && classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                     </select>
                 </div>
                 <div>
@@ -133,7 +143,7 @@ export default function AttendancePage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#3a2348]">
-                                {attendance.map(a => (
+                                {Array.isArray(attendance) && attendance.map(a => (
                                     <tr key={a._id} className="hover:bg-[#3a2348]/20 transition-colors">
                                         <td className="p-4">
                                             <p className="text-white font-medium">{a.userId?.name || "Unknown"}</p>
