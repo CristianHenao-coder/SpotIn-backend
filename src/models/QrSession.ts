@@ -1,6 +1,15 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
-const QrSessionSchema = new Schema(
+export interface IQrSession extends Document {
+  siteId: Types.ObjectId;
+  dateKey: string;
+  expiresAt?: Date;
+  createdByAdminId: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const QrSessionSchema = new Schema<IQrSession>(
   {
     siteId: { type: Schema.Types.ObjectId, ref: "Site", required: true, index: true },
     dateKey: { type: String, required: true }, // "YYYY-MM-DD"
@@ -15,4 +24,4 @@ QrSessionSchema.index({ siteId: 1, dateKey: 1 }, { unique: true });
 // Si usas expiración automática, descomenta:
 // QrSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const QrSession = models.QrSession || model("QrSession", QrSessionSchema);
+export const QrSession = models.QrSession || model<IQrSession>("QrSession", QrSessionSchema);

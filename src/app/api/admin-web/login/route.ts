@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
         await connectDB();
 
-        const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean();
+        const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean() as any;
         if (!user || !user.isActive) {
             return NextResponse.json({ message: "Credenciales inválidas" }, { status: 401 });
         }

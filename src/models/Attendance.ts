@@ -1,6 +1,27 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
-const AttendanceSchema = new Schema(
+export interface IAttendance extends Document {
+  userId: Types.ObjectId;
+  siteId: Types.ObjectId;
+  scheduleId?: Types.ObjectId;
+  qrSessionId: Types.ObjectId;
+  dateKey: string;
+  markedAt: Date;
+  location: {
+    type: "Point";
+    coordinates: [number, number]; // [lng, lat]
+  };
+  distanceMeters: number;
+  result: "ON_TIME" | "LATE";
+  status: "PENDING" | "CONFIRMED" | "REJECTED";
+  reviewedByAdminId?: Types.ObjectId;
+  reviewedAt?: Date;
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AttendanceSchema = new Schema<IAttendance>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     siteId: { type: Schema.Types.ObjectId, ref: "Site", required: true, index: true },
@@ -31,4 +52,4 @@ AttendanceSchema.index({ userId: 1, dateKey: 1 }, { unique: true });
 AttendanceSchema.index({ status: 1, dateKey: 1 });
 AttendanceSchema.index({ siteId: 1, dateKey: 1 });
 
-export const Attendance = models.Attendance || model("Attendance", AttendanceSchema);
+export const Attendance = models.Attendance || model<IAttendance>("Attendance", AttendanceSchema);

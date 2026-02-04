@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     await connectDB();
 
-    const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean();
+    const user = await User.findOne({ email: String(email).toLowerCase().trim() }).lean() as any;
     if (!user || !user.isActive) {
       return NextResponse.json({ message: "Credenciales inválidas" }, { status: 401 });
     }
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Credenciales inválidas" }, { status: 401 });
     }
 
-    
+
     const token = signToken({ sub: String(user._id), role: user.role }, "7d");
 
     return NextResponse.json({

@@ -1,6 +1,19 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
-const ScheduleSchema = new Schema(
+export interface ISchedule extends Document {
+  classroomId: Types.ObjectId;
+  userId?: Types.ObjectId;
+  siteId: Types.ObjectId;
+  daysOfWeek: number[];
+  startTime: string;
+  endTime: string;
+  lateAfterMinutes: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ScheduleSchema = new Schema<ISchedule>(
   {
     classroomId: { type: Schema.Types.ObjectId, ref: "Classroom", required: true, index: true },
     userId: { type: Schema.Types.ObjectId, ref: "User" }, // Optional fallback if needed, but primary is classroom
@@ -23,4 +36,4 @@ if (models.Schedule) {
   delete models.Schedule;
 }
 
-export const Schedule = model("Schedule", ScheduleSchema);
+export const Schedule = model<ISchedule>("Schedule", ScheduleSchema);

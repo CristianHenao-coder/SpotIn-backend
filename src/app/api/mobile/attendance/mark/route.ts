@@ -24,19 +24,19 @@ function timeNowHHmm() {
 function dayNow() {
   // 0..6
   const weekday = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" }).format(new Date());
-  return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(weekday);
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(weekday);
 }
 function toMinutes(hhmm: string) {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
 }
-function haversineMeters(lat1:number,lng1:number,lat2:number,lng2:number) {
+function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371000;
-  const dLat = (lat2-lat1) * Math.PI/180;
-  const dLng = (lng2-lng1) * Math.PI/180;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
   const a =
-    Math.sin(dLat/2)**2 +
-    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     await connectDB();
 
     // 2) traer site (radio + coords)
-    const site = await Site.findById(siteId).lean();
+    const site = await Site.findById(siteId).lean() as any;
     if (!site || !site.isActive) return NextResponse.json({ message: "Site inválido" }, { status: 400 });
 
     const [siteLng, siteLat] = site.location.coordinates;
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
     // 4) validar horario del usuario (día + site)
     const dow = dayNow();
-    const schedule = await Schedule.findOne({ userId: auth.sub, siteId, dayOfWeek: dow, isActive: true }).lean();
+    const schedule = await Schedule.findOne({ userId: auth.sub, siteId, daysOfWeek: dow, isActive: true }).lean() as any;
     if (!schedule) return NextResponse.json({ message: "No tienes horario para hoy" }, { status: 403 });
 
     const nowHHmm = timeNowHHmm();

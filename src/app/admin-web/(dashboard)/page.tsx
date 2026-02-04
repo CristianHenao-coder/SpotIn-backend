@@ -3,6 +3,8 @@ import { Attendance } from "@/src/models/Attendance";
 import { User } from "@/src/models/User";
 import { QrSession } from "@/src/models/QrSession";
 
+export const dynamic = "force-dynamic";
+
 // Helper to format time
 const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -117,8 +119,8 @@ export default async function DashboardPage() {
                             <div className="text-center">
                                 {lastQrParams ? (
                                     <>
-                                        <p className="text-white font-medium">Session #{String(lastQrParams._id).slice(-6)}</p>
-                                        <p className="text-[#b491ca] text-xs">Date: {lastQrParams.dateKey}</p>
+                                        <p className="text-white font-medium">Session #{String((lastQrParams as any)._id).slice(-6)}</p>
+                                        <p className="text-[#b491ca] text-xs">Date: {(lastQrParams as any).dateKey}</p>
                                     </>
                                 ) : (
                                     <p className="text-white font-medium">No sessions found</p>

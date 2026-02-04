@@ -78,7 +78,7 @@ export async function POST(req: Request) {
             dateKey: uniqueKey,
             expiresAt: expiresAt,
             createdByAdminId: adminUser.sub
-        });
+        }) as any;
 
         // 4. Generate Token and QR
         const token = signQrToken(newSession._id, expiresAt);
