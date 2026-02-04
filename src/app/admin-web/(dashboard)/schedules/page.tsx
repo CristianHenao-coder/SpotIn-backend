@@ -52,8 +52,12 @@ export default function SchedulesPage() {
             // Sort sites by name for better UX
             const sortedSites = Array.isArray(sitesData) ? [...sitesData].sort((a, b) => a.name.localeCompare(b.name)) : [];
             setSites(sortedSites);
-            setClassrooms(classroomsData);
-        });
+            if (Array.isArray(classroomsData)) {
+                setClassrooms(classroomsData);
+            } else {
+                setClassrooms([]);
+            }
+        }).catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
@@ -70,7 +74,11 @@ export default function SchedulesPage() {
 
             const res = await fetch(`/api/admin-web/schedules?${params.toString()}`);
             const data = await res.json();
-            setSchedules(data);
+            if (Array.isArray(data)) {
+                setSchedules(data);
+            } else {
+                setSchedules([]);
+            }
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
@@ -168,11 +176,11 @@ export default function SchedulesPage() {
             <div className="bg-[#291934] border border-[#3a2348] p-4 rounded-xl mb-6 flex flex-wrap gap-4 items-end">
                 <select className="bg-[#1c1122] border border-[#3a2348] rounded-lg px-4 py-2 text-white" value={filterSite} onChange={e => setFilterSite(e.target.value)}>
                     <option value="">All Sites</option>
-                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                    {Array.isArray(sites) && sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                 </select>
                 <select className="bg-[#1c1122] border border-[#3a2348] rounded-lg px-4 py-2 text-white" value={filterClassroom} onChange={e => setFilterClassroom(e.target.value)}>
                     <option value="">All Classrooms</option>
-                    {classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                    {Array.isArray(classrooms) && classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                 </select>
                 <button onClick={() => setFilterActive(!filterActive)} className={`px-4 py-2 rounded-lg text-sm font-bold border ${filterActive ? 'text-green-400 border-green-500/50' : 'text-[#b491ca] border-[#3a2348]'}`}>
                     {filterActive ? "Active Only" : "All"}
@@ -194,7 +202,7 @@ export default function SchedulesPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#3a2348]">
-                            {schedules.map(s => (
+                            {Array.isArray(schedules) && schedules.map(s => (
                                 <tr key={s._id} className="hover:bg-[#3a2348]/20 transition-colors">
                                     <td className="p-4 text-white font-medium">{s.classroomId?.name || (typeof s.classroomId === "string" ? s.classroomId : "Unknown")}</td>
                                     <td className="p-4 text-[#b491ca]">
@@ -231,14 +239,14 @@ export default function SchedulesPage() {
                                 <label className="text-xs text-[#b491ca] block mb-1">Classroom (*)</label>
                                 <select required className="w-full bg-[#291934] border border-[#3a2348] rounded text-white p-2" value={formData.classroomId} onChange={e => setFormData({ ...formData, classroomId: e.target.value })}>
                                     <option value="">Select Classroom</option>
-                                    {classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                                    {Array.isArray(classrooms) && classrooms.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                                 </select>
                             </div>
                             <div>
                                 <label className="text-xs text-[#b491ca] block mb-1">Site (*)</label>
                                 <select required className="w-full bg-[#291934] border border-[#3a2348] rounded text-white p-2" value={formData.siteId} onChange={e => setFormData({ ...formData, siteId: e.target.value })}>
                                     <option value="">Select Site</option>
-                                    {sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                                    {Array.isArray(sites) && sites.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                                 </select>
                                 {formData.siteId && !sites.find(s => s._id === formData.siteId) && (
                                     <p className="text-red-500 text-[10px] mt-1 italic">
